@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tim Hortons Menu & Prices | Customizable Experience</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        timRed: '#C8102E',
+                        timDarkRed: '#9B0B21',
+                        timCream: '#FBF8F5',
+                        timEspresso: '#2C1810',
+                        timGold: '#EAA123',
+                        timWarmGray: '#F3EFEA'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+                        'card': '0 4px 20px rgba(44, 24, 16, 0.08)',
+                        'float': '0 20px 30px -10px rgba(200, 16, 46, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar for smooth visual appeal */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C8102E;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9B0B21;
+        }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .category-tab-active {
+            background-color: #C8102E !important;
+            color: #FFFFFF !important;
+            border-color: #C8102E !important;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+        }
+
+        /* Hide horizontal scrollbar for category menu on touch/mobile */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Admin drawer transition */
+        .admin-drawer {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+<body class="bg-timCream text-timEspresso font-sans min-h-screen flex flex-col antialiased selection:bg-timRed selection:text-white">
+
+    <!-- Admin Control Bar (Top Sticky Banner) -->
+    <div id="adminTopBar" class="bg-timEspresso text-white px-4 py-2.5 shadow-md border-b border-amber-900/40 text-xs sm:text-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center bg-timGold text-timEspresso px-2 py-0.5 rounded-full font-bold text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1">="</i> Admin Mode
+                </span>
+                <span class="hidden md:inline text-gray-300">Toggle customization panels to edit Header, Hero Banner, & Menu Items live.</span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Customization Drawer Toggles -->
+                <button onclick="toggleAdminPanel('headerPanel')" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-white/10">
+                    <i class="fa-solid fa-heading text-timGold"></i> Customize Header
+                </button>
+                <button onclick="toggleAdminPanel('heroPanel')" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-white/10">
+                    <i class="fa-solid fa-image text-timGold"></i> Customize Hero
+                </button>
+                <button onclick="openAddItemModal()" class="px-3 py-1 bg-timRed hover:bg-timDarkRed text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-plus"></i> Add Item
+                </button>
+                <button onclick="resetToDefaults()" title="Reset all custom settings" class="p-1.5 text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customizable Main Header -->
+    <header id="mainHeader" class="bg-timRed text-white transition-colors duration-300 shadow-md relative z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <div id="headerLogoContainer" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white text-timRed flex items-center justify-center text-xl sm:text-2xl font-black shadow-inner font-display">
+                    TH
+                </div>
+                <div>
+                    <h1 id="headerTitle" class="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight font-display">
+                        Tim Hortons
+                    </h1>
+                    <p id="headerSubtitle" class="text-xs sm:text-sm text-white/80 font-medium -mt-1">
+                        Always Fresh, Always Delicious
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header Quick Info & Actions -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden lg:flex items-center space-x-6 text-sm">
+                    <a href="#menuSection" class="hover:text-amber-200 transition font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-mug-hot text-xs opacity-80"></i> Menu & Prices
+                    </a>
+                    <a href="#aboutSection" class="hover:text-amber-200 transition font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-xs opacity-80"></i> Our Story
+                    </a>
+                </div>
+
+                <!-- Order Now Badge Button -->
+                <a href="#menuSection" class="px-4 py-2 bg-timGold hover:bg-amber-500 text-timEspresso font-bold rounded-full text-xs sm:text-sm shadow-md transition transform hover:scale-105 flex items-center gap-2">
+                    <i class="fa-solid fa-utensils"></i> Explore Menu
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Header Admin Panel Collapsible Drawer -->
+    <div id="headerPanel" class="hidden bg-white border-b-2 border-timRed p-4 sm:p-6 shadow-xl relative z-40 transition-all">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-timEspresso flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-timRed"></i> Header Live Customizer
+                </h3>
+                <button onclick="toggleAdminPanel('headerPanel')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Header Title</label>
+                    <input type="text" id="inputHeaderTitle" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="e.g. Tim Hortons Menu">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Subtitle / Tagline</label>
+                    <input type="text" id="inputHeaderSubtitle" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="e.g. Always Fresh">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Background Color</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="inputHeaderBg" class="h-8 w-12 rounded cursor-pointer border border-gray-300 p-0.5">
+                        <input type="text" id="inputHeaderBgHex" class="w-full px-2 py-1 text-xs border border-gray-300 rounded uppercase font-mono" placeholder="#C8102E">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Text Color</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="inputHeaderTextColor" class="h-8 w-12 rounded cursor-pointer border border-gray-300 p-0.5">
+                        <input type="text" id="inputHeaderTextColorHex" class="w-full px-2 py-1 text-xs border border-gray-300 rounded uppercase font-mono" placeholder="#FFFFFF">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button onclick="saveHeaderCustomization()" class="px-4 py-1.5 bg-timRed text-white text-xs font-bold rounded-lg hover:bg-timDarkRed transition shadow">
+                    Apply Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Admin Panel Collapsible Drawer -->
+    <div id="heroPanel" class="hidden bg-white border-b-2 border-timGold p-4 sm:p-6 shadow-xl relative z-40 transition-all">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-timEspresso flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-timGold"></i> Hero Banner Live Customizer
+                </h3>
+                <button onclick="toggleAdminPanel('heroPanel')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Hero Title</label>
+                    <input type="text" id="inputHeroTitle" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Hero Subtitle</label>
+                    <input type="text" id="inputHeroSubtitle" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Button Text</label>
+                    <input type="text" id="inputHeroBtnText" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Hero Image URL</label>
+                    <input type="text" id="inputHeroImageUrl" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="https://images.unsplash.com/...">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Banner Background Color</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="inputHeroBgColor" class="h-8 w-12 rounded cursor-pointer border border-gray-300 p-0.5">
+                        <input type="text" id="inputHeroBgHex" class="w-full px-2 py-1 text-xs border border-gray-300 rounded uppercase font-mono">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button onclick="saveHeroCustomization()" class="px-4 py-1.5 bg-timGold text-timEspresso text-xs font-bold rounded-lg hover:bg-amber-500 transition shadow">
+                    Apply Hero Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customizable Hero Banner Section -->
+    <section id="heroSection" class="relative overflow-hidden bg-timDarkRed text-white py-12 lg:py-20 transition-all duration-300">
+        <!-- Background decorative vectors/gradients -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
+        <div id="heroBgImage" class="absolute inset-0 bg-cover bg-center opacity-40 transition-all duration-500 transform scale-105" style="background-image: url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=1200&auto=format&fit=crop');"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4 sm:space-y-6">
+                    <span id="heroBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-timGold text-timEspresso uppercase tracking-widest shadow">
+                        <i class="fa-solid fa-star text-xs"></i> Fresh Brewed Daily
+                    </span>
+                    <h2 id="heroTitle" class="text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight leading-tight">
+                        Warm Up With Canada's Favorite Coffee & Fresh Treats
+                    </h2>
+                    <p id="heroSubtitle" class="text-base sm:text-lg text-gray-200 max-w-2xl leading-relaxed">
+                        Explore our handcrafted hot & iced beverages, iconic Timbits, freshly baked donuts, and hearty breakfast wraps.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <a id="heroBtn" href="#menuSection" class="px-6 py-3.5 bg-timRed hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                            <span>View Full Menu & Prices</span>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </a>
+                        <button onclick="scrollToCategory('Hot Beverages')" class="px-5 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold rounded-xl transition border border-white/20 flex items-center gap-2">
+                            <i class="fa-solid fa-mug-hot text-timGold"></i> Hot Drinks
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Featured Highlight Banner Card -->
+                <div class="lg:col-span-5 hidden lg:block">
+                    <div class="glass-panel p-6 rounded-2xl shadow-card border border-white/20 text-timEspresso relative overflow-hidden transform rotate-1 hover:rotate-0 transition duration-300">
+                        <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-timRed/10 rounded-full blur-2xl"></div>
+                        <span class="bg-timRed text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md">
+                            Iconic Classic
+                        </span>
+                        <h3 class="text-2xl font-bold font-display mt-3 text-timEspresso">Iced Capp® & Timbits®</h3>
+                        <p class="text-sm text-gray-600 mt-2">Pair your velvety smooth signature frozen coffee with a box of assorted freshly baked donut bites.</p>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <div>
+                                <span class="text-xs text-gray-500 uppercase font-semibold">Starting From</span>
+                                <div class="text-2xl font-black text-timRed">$3.49 <span class="text-xs text-gray-500 font-normal">CAD</span></div>
+                            </div>
+                            <button onclick="openQuickView('iced-capp')" class="px-4 py-2 bg-timEspresso hover:bg-black text-white text-xs font-bold rounded-lg transition">
+                                Quick Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sticky Navigation Category Bar & Search Options -->
+    <div class="sticky top-[49px] z-30 bg-white border-b border-gray-200 shadow-sm transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 py-3">
+                
+                <!-- Horizontal Scrollable Categories -->
+                <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 scroll-smooth" id="categoryNavContainer">
+                    <!-- Categories injected via JS dynamically -->
+                </div>
+
+                <!-- Search & Dietary Filter Toggle Bar -->
+                <div class="flex items-center space-x-2 shrink-0">
+                    <!-- Search Input Box -->
+                    <div class="relative flex-1 md:w-64">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search menu, calories..." 
+                            class="w-full pl-9 pr-8 py-2 text-sm bg-timWarmGray border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-timRed focus:bg-white transition">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 text-xs">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Dietary Filter Options Dropdown -->
+                    <select id="dietaryFilter" onchange="renderMenu()" class="py-2 px-3 text-xs sm:text-sm bg-timWarmGray border border-gray-300 rounded-full text-timEspresso font-medium focus:ring-2 focus:ring-timRed outline-none cursor-pointer">
+                        <option value="all">All Dietary</option>
+                        <option value="vegetarian">🌱 Vegetarian</option>
+                        <option value="dairy-free">🥛 Dairy-Free Option</option>
+                        <option value="bestseller">🔥 Bestsellers</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Interactive Menu Grid Container -->
+    <main id="menuSection" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Category Title & Active Status Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b border-gray-200 pb-4">
+            <div>
+                <h2 id="currentCategoryHeading" class="text-2xl sm:text-3xl font-black font-display text-timEspresso tracking-tight">
+                    Full Menu
+                </h2>
+                <p id="currentCategoryCount" class="text-xs sm:text-sm text-gray-500 font-medium">
+                    Showing all fresh items
+                </p>
+            </div>
+
+            <!-- Admin Item Management Quick Action -->
+            <button onclick="openAddItemModal()" class="self-start sm:self-auto px-4 py-2 bg-timWarmGray hover:bg-gray-200 text-timEspresso text-xs font-bold rounded-lg border border-gray-300 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-plus text-timRed"></i> Add New Menu Item
+            </button>
+        </div>
+
+        <!-- Menu Grid Display -->
+        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Items rendered dynamically via JavaScript -->
+        </div>
+
+        <!-- Empty State Alert (When search or filter finds no items) -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200 my-6">
+            <div class="w-16 h-16 bg-red-50 text-timRed rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
+                <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <h3 class="text-lg font-bold text-timEspresso">No items found</h3>
+            <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">We couldn't find anything matching your search criteria. Try clearing search filters or choosing another category.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-timRed text-white text-xs font-bold rounded-lg shadow hover:bg-timDarkRed transition">
+                Reset All Filters
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Authentic Tim Hortons Brand Section -->
+    <section id="aboutSection" class="bg-timWarmGray py-12 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-timRed text-white rounded-xl shadow-md">
+                        <i class="fa-solid fa-coffee text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-timEspresso text-base">100% Premium Arabica</h4>
+                        <p class="text-xs text-gray-600 mt-1 leading-relaxed">Our coffee beans are roasted with precision and freshly brewed every 20 minutes for peak flavor.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-timRed text-white rounded-xl shadow-md">
+                        <i class="fa-solid fa-bread-slice text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-timEspresso text-base">Fresh Baked Daily</h4>
+                        <p class="text-xs text-gray-600 mt-1 leading-relaxed">From signature Timbits to Boston Creams, our baked goods bring smiles from coast to coast.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-timRed text-white rounded-xl shadow-md">
+                        <i class="fa-solid fa-leaf text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-timEspresso text-base">Customizable Options</h4>
+                        <p class="text-xs text-gray-600 mt-1 leading-relaxed">Personalize your beverage with oat milk, almond milk, extra espresso shots, or flavor syrups.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Item Quick View / Size Customization Modal -->
+    <div id="itemDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all animate-fadeIn">
+            <!-- Modal Header Header image -->
+            <div class="relative h-56 bg-gray-100 overflow-hidden">
+                <img id="modalItemImage" src="" alt="" class="w-full h-full object-cover">
+                <button onclick="closeModal('itemDetailModal')" class="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black text-white rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+                <span id="modalItemTag" class="absolute bottom-3 left-3 bg-timRed text-white text-xs font-bold px-2.5 py-1 rounded-md shadow">
+                    Tag
+                </span>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6">
+                <div class="flex justify-between items-start gap-2">
+                    <div>
+                        <h3 id="modalItemTitle" class="text-2xl font-bold font-display text-timEspresso">Item Name</h3>
+                        <p id="modalItemCategory" class="text-xs font-semibold uppercase tracking-wider text-timRed mt-0.5">Category</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="modalItemPrice" class="text-2xl font-black text-timRed">$0.00</span>
+                        <div id="modalItemCalories" class="text-xs text-gray-500 font-medium">0 Cals</div>
+                    </div>
+                </div>
+
+                <p id="modalItemDescription" class="text-sm text-gray-600 mt-4 leading-relaxed">
+                    Detailed item description goes here.
+                </p>
+
+                <!-- Size Selection Selector (For beverages / soups) -->
+                <div id="sizeSelectorContainer" class="mt-6 pt-4 border-t border-gray-100">
+                    <label class="block text-xs font-bold text-timEspresso uppercase tracking-wider mb-2">Select Size</label>
+                    <div class="grid grid-cols-3 gap-2" id="sizeButtons">
+                        <button onclick="selectSize('Small', 0)" class="size-btn py-2 text-xs font-bold border border-gray-300 rounded-xl hover:border-timRed transition text-center focus:outline-none">
+                            Small
+                        </button>
+                        <button onclick="selectSize('Medium', 0.50)" class="size-btn py-2 text-xs font-bold border-2 border-timRed bg-red-50 text-timRed rounded-xl text-center focus:outline-none">
+                            Medium
+                        </button>
+                        <button onclick="selectSize('Large', 1.00)" class="size-btn py-2 text-xs font-bold border border-gray-300 rounded-xl hover:border-timRed transition text-center focus:outline-none">
+                            Large
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="mt-6 flex items-center justify-between gap-3">
+                    <button onclick="closeModal('itemDetailModal')" class="w-full py-3 bg-timWarmGray hover:bg-gray-200 text-timEspresso font-bold text-sm rounded-xl transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Item Modal Drawer -->
+    <div id="itemFormModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-timEspresso text-white p-4 px-6 flex justify-between items-center">
+                <h3 id="formModalTitle" class="text-lg font-bold font-display flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-timGold"></i> Add New Menu Item
+                </h3>
+                <button onclick="closeModal('itemFormModal')" class="text-gray-300 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Form Content -->
+            <form id="menuItemForm" onsubmit="handleItemFormSubmit(event)" class="p-6 overflow-y-auto space-y-4">
+                <input type="hidden" id="editItemId">
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Item Name *</label>
+                    <input type="text" id="formTitle" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="e.g. French Vanilla Cold Brew">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Category *</label>
+                        <select id="formCategory" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none bg-white">
+                            <option value="Hot Beverages">Hot Beverages</option>
+                            <option value="Cold Beverages">Cold Beverages</option>
+                            <option value="Donuts & Timbits">Donuts & Timbits</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Sandwiches & Wraps">Sandwiches & Wraps</option>
+                            <option value="Bakery & Snacks">Bakery & Snacks</option>
+                            <option value="Merch">Merch</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Price ($ CAD) *</label>
+                        <input type="number" step="0.01" id="formPrice" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="2.99">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Calories (e.g., 210 Cals)</label>
+                        <input type="text" id="formCalories" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="210 Cals">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Badge Tag</label>
+                        <select id="formTag" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none bg-white">
+                            <option value="Classic">Classic</option>
+                            <option value="Bestseller">Bestseller</option>
+                            <option value="New">New</option>
+                            <option value="Seasonal">Seasonal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Dietary Tag</label>
+                    <select id="formDietary" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none bg-white">
+                        <option value="none">None</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="dairy-free">Dairy-Free Option</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Image URL</label>
+                    <input type="url" id="formImageUrl" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+                    <textarea id="formDescription" rows="3" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-timRed outline-none" placeholder="Short appetizing description..."></textarea>
+                </div>
+
+                <!-- Submit Button Bar -->
+                <div class="pt-4 border-t border-gray-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('itemFormModal')" class="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-timRed hover:bg-timDarkRed rounded-lg shadow transition">
+                        Save Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-timEspresso text-white/70 py-10 border-t border-amber-950">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 rounded-full bg-timRed text-white flex items-center justify-center font-bold text-sm">TH</div>
+                <span class="text-xl font-bold font-display text-white">Tim Hortons</span>
+            </div>
+            <p class="text-xs text-gray-400 max-w-md mx-auto">
+                Interactive Tim Hortons Menu & Customizer. All custom edits persist locally on your browser.
+            </p>
+            <div class="mt-6 text-xs text-gray-500">
+                &copy; <span id="year">2026</span> Tim Hortons Demo Menu Web App. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Default Tim Hortons Menu Data Definition
+        const DEFAULT_CATEGORIES = [
+            'All Menu',
+            'Hot Beverages',
+            'Cold Beverages',
+            'Donuts & Timbits',
+            'Breakfast',
+            'Sandwiches & Wraps',
+            'Bakery & Snacks',
+            'Merch'
+        ];
+
+        const DEFAULT_MENU_ITEMS = [
+            {
+                id: 'original-blend',
+                title: 'Original Blend Coffee',
+                category: 'Hot Beverages',
+                price: 1.89,
+                calories: '3 Cals',
+                tag: 'Bestseller',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop',
+                description: 'Our signature Original Blend coffee made with 100% Premium Arabica beans roasted with care. Always brewed fresh every 20 minutes.'
+            },
+            {
+                id: 'double-double',
+                title: 'Double Double™ Coffee',
+                category: 'Hot Beverages',
+                price: 1.89,
+                calories: '210 Cals',
+                tag: 'Classic',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=600&auto=format&fit=crop',
+                description: 'Canada’s iconic cup: Freshly brewed Tim Hortons Original Blend coffee with two creams and two sugars.'
+            },
+            {
+                id: 'french-vanilla',
+                title: 'French Vanilla Cappuccino',
+                category: 'Hot Beverages',
+                price: 2.79,
+                calories: '270 Cals',
+                tag: 'Bestseller',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=600&auto=format&fit=crop',
+                description: 'Rich, smooth, and creamy French Vanilla hot beverage topped with a light frothy foam layer.'
+            },
+            {
+                id: 'iced-capp',
+                title: 'Iced Capp® Original',
+                category: 'Cold Beverages',
+                price: 3.49,
+                calories: '360 Cals',
+                tag: 'Bestseller',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=600&auto=format&fit=crop',
+                description: 'The ultimate icy cold refreshment! Our famous blended frozen coffee beverage made with real cream.'
+            },
+            {
+                id: 'cold-brew-vanilla',
+                title: 'Vanilla Cream Cold Brew',
+                category: 'Cold Beverages',
+                price: 3.99,
+                calories: '190 Cals',
+                tag: 'New',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1517701534960-058f8e02d689?q=80&w=600&auto=format&fit=crop',
+                description: 'Steeped slowly in cold water for 16 hours for an ultra-smooth taste, topped with sweet vanilla cream.'
+            },
+            {
+                id: 'timbits-10pack',
+                title: '10 Pack Timbits® Box',
+                category: 'Donuts & Timbits',
+                price: 2.99,
+                calories: '600-900 Cals',
+                tag: 'Bestseller',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=600&auto=format&fit=crop',
+                description: 'An assortment of bite-sized donut holes including Chocolate Glazed, Birthday Cake, Honey Dip, and Old Fashioned Plain.'
+            },
+            {
+                id: 'boston-cream',
+                title: 'Boston Cream Donut',
+                category: 'Donuts & Timbits',
+                price: 1.49,
+                calories: '220 Cals',
+                tag: 'Classic',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=600&auto=format&fit=crop',
+                description: 'Yeast-raised donut filled with smooth Venetian cream and topped with chocolate fudge fondant.'
+            },
+            {
+                id: 'farmers-wrap',
+                title: 'Sausage Farmers Breakfast Wrap',
+                category: 'Breakfast',
+                price: 4.99,
+                calories: '680 Cals',
+                tag: 'Bestseller',
+                dietary: 'none',
+                imageUrl: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=600&auto=format&fit=crop',
+                description: 'Savory sausage patty, fluffy scrambled egg, crispy hash brown, and cheddar cheese with spicy Chipotle sauce wrapped in a warm tortilla.'
+            },
+            {
+                id: 'turkey-bacon-club',
+                title: 'Turkey Bacon Club Sandwich',
+                category: 'Sandwiches & Wraps',
+                price: 7.29,
+                calories: '510 Cals',
+                tag: 'Classic',
+                dietary: 'none',
+                imageUrl: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=600&auto=format&fit=crop',
+                description: 'Oven-roasted turkey breast, crispy bacon, fresh lettuce, tomato, and mayo served on an artisan toasted bun.'
+            },
+            {
+                id: 'chocolate-chip-muffin',
+                title: 'Chocolate Chip Muffin',
+                category: 'Bakery & Snacks',
+                price: 1.99,
+                calories: '410 Cals',
+                tag: 'Classic',
+                dietary: 'vegetarian',
+                imageUrl: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?q=80&w=600&auto=format&fit=crop',
+                description: 'Moist and delicious freshly baked muffin packed generously with sweet semi-sweet chocolate chips.'
+            },
+            {
+                id: 'tim-mug-red',
+                title: 'Signature Red Travel Mug',
+                category: 'Merch',
+                price: 14.99,
+                calories: 'N/A',
+                tag: 'Seasonal',
+                dietary: 'none',
+                imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop',
+                description: 'Double-walled stainless steel thermal travel mug keeping your coffee hot for up to 6 hours.'
+            }
+        ];
+
+        // Global State Variables
+        let menuItems = [];
+        let activeCategory = 'All Menu';
+        let currentItemForView = null;
+        let selectedSizePriceOffset = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedCustomizations();
+            loadMenuItems();
+            renderCategoryNav();
+            renderMenu();
+        });
+
+        // Load items from LocalStorage or Default
+        function loadMenuItems() {
+            const savedItems = localStorage.getItem('th_menu_items');
+            if (savedItems) {
+                try {
+                    menuItems = JSON.parse(savedItems);
+                } catch(e) {
+                    menuItems = [...DEFAULT_MENU_ITEMS];
+                }
+            } else {
+                menuItems = [...DEFAULT_MENU_ITEMS];
+            }
+        }
+
+        // Save menu items to LocalStorage
+        function saveMenuItems() {
+            localStorage.setItem('th_menu_items', JSON.stringify(menuItems));
+        }
+
+        function renderCategoryNav() {
+            const container = document.getElementById('categoryNavContainer');
+            container.innerHTML = '';
+
+            DEFAULT_CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition border ${
+                    activeCategory === cat ? 'category-tab-active' : 'bg-timWarmGray text-timEspresso border-gray-200 hover:bg-gray-200'
+                }`;
+                btn.innerText = cat;
+                btn.onclick = () => scrollToCategory(cat);
+                container.appendChild(btn);
+            });
+        }
+
+        function scrollToCategory(categoryName) {
+            activeCategory = categoryName;
+            renderCategoryNav();
+            renderMenu();
+            
+            const menuSection = document.getElementById('menuSection');
+            menuSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            const emptyState = document.getElementById('emptyState');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const dietVal = document.getElementById('dietaryFilter').value;
+
+            // Filter items by Category, Search Keyword, and Dietary Preference
+            const filteredItems = menuItems.filter(item => {
+                const matchesCategory = (activeCategory === 'All Menu') || (item.category === activeCategory);
+                const matchesSearch = item.title.toLowerCase().includes(searchVal) || 
+                                      item.description.toLowerCase().includes(searchVal) || 
+                                      item.category.toLowerCase().includes(searchVal);
+                
+                let matchesDiet = true;
+                if (dietVal === 'vegetarian') matchesDiet = item.dietary === 'vegetarian';
+                if (dietVal === 'dairy-free') matchesDiet = item.dietary === 'dairy-free';
+                if (dietVal === 'bestseller') matchesDiet = item.tag === 'Bestseller';
+
+                return matchesCategory && matchesSearch && matchesDiet;
+            });
+
+            // Update Headings
+            document.getElementById('currentCategoryHeading').innerText = activeCategory;
+            document.getElementById('currentCategoryCount').innerText = `Showing ${filteredItems.length} item${filteredItems.length === 1 ? '' : 's'}`;
+
+            if (filteredItems.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // Render Menu Cards
+            grid.innerHTML = filteredItems.map(item => `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-soft border border-gray-100 hover:shadow-card transition duration-300 flex flex-col group relative">
+                    
+                    <!-- Admin Action Buttons Overlay -->
+                    <div class="absolute top-2 right-2 z-10 flex gap-1 bg-black/60 backdrop-blur-md p-1 rounded-lg opacity-90 group-hover:opacity-100 transition">
+                        <button onclick="openEditItemModal('${item.id}')" title="Edit Item" class="p-1.5 text-xs text-white hover:text-amber-300 transition">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteMenuItem('${item.id}')" title="Delete Item" class="p-1.5 text-xs text-red-300 hover:text-red-500 transition">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Badge Tag -->
+                    ${item.tag ? `<span class="absolute top-3 left-3 z-10 bg-timRed text-white text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">${item.tag}</span>` : ''}
+
+                    <!-- Image Thumbnail -->
+                    <div class="relative h-48 bg-gray-100 overflow-hidden cursor-pointer" onclick="openQuickView('${item.id}')">
+                        <img src="${item.imageUrl || 'https://placehold.co/600x400/2C1810/FFFFFF?text=Tim+Hortons'}" 
+                             alt="${item.title}" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/600x400/2C1810/FFFFFF?text=Tim+Hortons';"
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h3 onclick="openQuickView('${item.id}')" class="font-bold text-base text-timEspresso hover:text-timRed transition cursor-pointer font-display line-clamp-1">
+                                    ${item.title}
+                                </h3>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                                ${item.description || 'Freshly prepared Tim Hortons favorite.'}
+                            </p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-lg font-black text-timRed">$${parseFloat(item.price).toFixed(2)}</span>
+                                <span class="text-[11px] text-gray-400 font-medium ml-1">${item.calories || ''}</span>
+                            </div>
+                            <button onclick="openQuickView('${item.id}')" class="px-3 py-1.5 bg-timWarmGray hover:bg-timRed hover:text-white text-timEspresso font-bold text-xs rounded-lg transition flex items-center gap-1">
+                                <span>Details</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleSearch() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (input.value.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderMenu();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderMenu();
+        }
+
+        function resetFilters() {
+            clearSearch();
+            document.getElementById('dietaryFilter').value = 'all';
+            activeCategory = 'All Menu';
+            renderCategoryNav();
+            renderMenu();
+        }
+
+        function openQuickView(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            currentItemForView = item;
+            selectedSizePriceOffset = 0;
+
+            document.getElementById('modalItemTitle').innerText = item.title;
+            document.getElementById('modalItemCategory').innerText = item.category;
+            document.getElementById('modalItemPrice').innerText = `$${parseFloat(item.price).toFixed(2)}`;
+            document.getElementById('modalItemCalories').innerText = item.calories || '';
+            document.getElementById('modalItemDescription').innerText = item.description || '';
+            document.getElementById('modalItemTag').innerText = item.tag || 'Classic';
+            
+            const img = document.getElementById('modalItemImage');
+            img.src = item.imageUrl || 'https://placehold.co/600x400/2C1810/FFFFFF?text=Tim+Hortons';
+
+            // Show size buttons for beverages
+            const sizeContainer = document.getElementById('sizeSelectorContainer');
+            if (item.category.includes('Beverages')) {
+                sizeContainer.classList.remove('hidden');
+            } else {
+                sizeContainer.classList.add('hidden');
+            }
+
+            openModal('itemDetailModal');
+        }
+
+        function selectSize(sizeName, offset) {
+            if (!currentItemForView) return;
+            selectedSizePriceOffset = offset;
+            const newPrice = (parseFloat(currentItemForView.price) + offset).toFixed(2);
+            document.getElementById('modalItemPrice').innerText = `$${newPrice}`;
+
+            // Highlight active button
+            const btns = document.querySelectorAll('.size-btn');
+            btns.forEach(btn => {
+                if (btn.innerText.includes(sizeName)) {
+                    btn.className = 'size-btn py-2 text-xs font-bold border-2 border-timRed bg-red-50 text-timRed rounded-xl text-center focus:outline-none';
+                } else {
+                    btn.className = 'size-btn py-2 text-xs font-bold border border-gray-300 rounded-xl hover:border-timRed transition text-center focus:outline-none';
+                }
+            });
+        }
+
+        function openAddItemModal() {
+            document.getElementById('formModalTitle').innerHTML = `<i class="fa-solid fa-plus text-timGold"></i> Add New Menu Item`;
+            document.getElementById('editItemId').value = '';
+            document.getElementById('menuItemForm').reset();
+            openModal('itemFormModal');
+        }
+
+        function openEditItemModal(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('formModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-timGold"></i> Edit Menu Item`;
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('formTitle').value = item.title;
+            document.getElementById('formCategory').value = item.category;
+            document.getElementById('formPrice').value = item.price;
+            document.getElementById('formCalories').value = item.calories || '';
+            document.getElementById('formTag').value = item.tag || 'Classic';
+            document.getElementById('formDietary').value = item.dietary || 'none';
+            document.getElementById('formImageUrl').value = item.imageUrl || '';
+            document.getElementById('formDescription').value = item.description || '';
+
+            openModal('itemFormModal');
+        }
+
+        function handleItemFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editItemId').value;
+
+            const newItemData = {
+                id: editId ? editId : 'item-' + Date.now(),
+                title: document.getElementById('formTitle').value.trim(),
+                category: document.getElementById('formCategory').value,
+                price: parseFloat(document.getElementById('formPrice').value) || 0.00,
+                calories: document.getElementById('formCalories').value.trim(),
+                tag: document.getElementById('formTag').value,
+                dietary: document.getElementById('formDietary').value,
+                imageUrl: document.getElementById('formImageUrl').value.trim(),
+                description: document.getElementById('formDescription').value.trim()
+            };
+
+            if (editId) {
+                // Edit existing
+                const index = menuItems.findIndex(i => i.id === editId);
+                if (index !== -1) menuItems[index] = newItemData;
+            } else {
+                // Add new
+                menuItems.unshift(newItemData);
+            }
+
+            saveMenuItems();
+            renderMenu();
+            closeModal('itemFormModal');
+        }
+
+        function deleteMenuItem(itemId) {
+            menuItems = menuItems.filter(i => i.id !== itemId);
+            saveMenuItems();
+            renderMenu();
+        }
+
+        function toggleAdminPanel(panelId) {
+            const panel = document.getElementById(panelId);
+            const isHidden = panel.classList.contains('hidden');
+            
+            // Close other admin panel
+            document.getElementById('headerPanel').classList.add('hidden');
+            document.getElementById('heroPanel').classList.add('hidden');
+
+            if (isHidden) {
+                panel.classList.remove('hidden');
+                populateCustomizerInputs();
+            }
+        }
+
+        function populateCustomizerInputs() {
+            // Populate Header controls
+            document.getElementById('inputHeaderTitle').value = document.getElementById('headerTitle').innerText;
+            document.getElementById('inputHeaderSubtitle').value = document.getElementById('headerSubtitle').innerText;
+
+            // Hero controls
+            document.getElementById('inputHeroTitle').value = document.getElementById('heroTitle').innerText;
+            document.getElementById('inputHeroSubtitle').value = document.getElementById('heroSubtitle').innerText;
+            document.getElementById('inputHeroBtnText').value = document.getElementById('heroBtn').querySelector('span').innerText;
+        }
+
+        function saveHeaderCustomization() {
+            const title = document.getElementById('inputHeaderTitle').value;
+            const subtitle = document.getElementById('inputHeaderSubtitle').value;
+            const bgColor = document.getElementById('inputHeaderBg').value || document.getElementById('inputHeaderBgHex').value;
+            const textColor = document.getElementById('inputHeaderTextColor').value || document.getElementById('inputHeaderTextColorHex').value;
+
+            if (title) document.getElementById('headerTitle').innerText = title;
+            if (subtitle) document.getElementById('headerSubtitle').innerText = subtitle;
+
+            const header = document.getElementById('mainHeader');
+            if (bgColor) header.style.backgroundColor = bgColor;
+            if (textColor) header.style.color = textColor;
+
+            // Save settings to LocalStorage
+            const headerSettings = { title, subtitle, bgColor, textColor };
+            localStorage.setItem('th_header_settings', JSON.stringify(headerSettings));
+            toggleAdminPanel('headerPanel');
+        }
+
+        function saveHeroCustomization() {
+            const title = document.getElementById('inputHeroTitle').value;
+            const subtitle = document.getElementById('inputHeroSubtitle').value;
+            const btnText = document.getElementById('inputHeroBtnText').value;
+            const imageUrl = document.getElementById('inputHeroImageUrl').value;
+            const bgColor = document.getElementById('inputHeroBgColor').value || document.getElementById('inputHeroBgHex').value;
+
+            if (title) document.getElementById('heroTitle').innerText = title;
+            if (subtitle) document.getElementById('heroSubtitle').innerText = subtitle;
+            if (btnText) document.getElementById('heroBtn').querySelector('span').innerText = btnText;
+            
+            if (imageUrl) {
+                document.getElementById('heroBgImage').style.backgroundImage = `url('${imageUrl}')`;
+            }
+            if (bgColor) {
+                document.getElementById('heroSection').style.backgroundColor = bgColor;
+            }
+
+            const heroSettings = { title, subtitle, btnText, imageUrl, bgColor };
+            localStorage.setItem('th_hero_settings', JSON.stringify(heroSettings));
+            toggleAdminPanel('heroPanel');
+        }
+
+        function loadSavedCustomizations() {
+            // Load Header Settings
+            const savedHeader = localStorage.getItem('th_header_settings');
+            if (savedHeader) {
+                try {
+                    const h = JSON.parse(savedHeader);
+                    if (h.title) document.getElementById('headerTitle').innerText = h.title;
+                    if (h.subtitle) document.getElementById('headerSubtitle').innerText = h.subtitle;
+                    if (h.bgColor) document.getElementById('mainHeader').style.backgroundColor = h.bgColor;
+                    if (h.textColor) document.getElementById('mainHeader').style.color = h.textColor;
+                } catch(e) {}
+            }
+
+            // Load Hero Settings
+            const savedHero = localStorage.getItem('th_hero_settings');
+            if (savedHero) {
+                try {
+                    const hero = JSON.parse(savedHero);
+                    if (hero.title) document.getElementById('heroTitle').innerText = hero.title;
+                    if (hero.subtitle) document.getElementById('heroSubtitle').innerText = hero.subtitle;
+                    if (hero.btnText) document.getElementById('heroBtn').querySelector('span').innerText = hero.btnText;
+                    if (hero.imageUrl) document.getElementById('heroBgImage').style.backgroundImage = `url('${hero.imageUrl}')`;
+                    if (hero.bgColor) document.getElementById('heroSection').style.backgroundColor = hero.bgColor;
+                } catch(e) {}
+            }
+        }
+
+        // Reset to original defaults
+        function resetToDefaults() {
+            localStorage.removeItem('th_menu_items');
+            localStorage.removeItem('th_header_settings');
+            localStorage.removeItem('th_hero_settings');
+            location.reload();
+        }
+
+        // Modal Helpers
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Color input Syncing helpers
+        document.getElementById('inputHeaderBg').addEventListener('input', (e) => {
+            document.getElementById('inputHeaderBgHex').value = e.target.value.toUpperCase();
+        });
+        document.getElementById('inputHeaderTextColor').addEventListener('input', (e) => {
+            document.getElementById('inputHeaderTextColorHex').value = e.target.value.toUpperCase();
+        });
+        document.getElementById('inputHeroBgColor').addEventListener('input', (e) => {
+            document.getElementById('inputHeroBgHex').value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
